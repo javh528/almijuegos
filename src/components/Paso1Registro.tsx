@@ -75,7 +75,7 @@ export default function Paso1Registro({ onClienteIdentificado }: Props) {
 
       onClienteIdentificado(cliente);
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.DEV) console.error(err);
       setError('Error al conectar con el servidor. Intenta de nuevo.');
     } finally {
       setLoading(false);

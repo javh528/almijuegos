@@ -38,7 +38,9 @@ export default function AdminLogin() {
       await login(cleanEmail, password);
       navigate('/admin', { replace: true });
     } catch (err: unknown) {
-      console.error('Error detallado de Firebase Auth:', err);
+      if (import.meta.env.DEV) {
+        console.error('Firebase Auth error:', err);
+      }
       if (err instanceof FirebaseError) {
         switch (err.code) {
           case 'auth/invalid-credential':

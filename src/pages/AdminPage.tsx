@@ -251,7 +251,7 @@ Muchas felicidades y un sincero abrazo de parte de toda la familia Almi Pollo!`;
 
   // Cerrar rifa y reiniciar tablero
   const cerrarRifa = async () => {
-    const num = parseInt(ganadorNumero);
+    const num = parseInt(ganadorNumero, 10);
     if (isNaN(num) || num < 0 || num > 99) {
       setMsgCierre('⚠ Ingresa un número ganador válido (00-99).');
       return;
@@ -309,7 +309,7 @@ Muchas felicidades y un sincero abrazo de parte de toda la familia Almi Pollo!`;
         try {
           window.open(waUrl, '_blank');
         } catch (e) {
-          console.warn('Bloqueo de ventana emergente al abrir WhatsApp:', e);
+          if (import.meta.env.DEV) console.warn('Bloqueo de ventana emergente al abrir WhatsApp:', e);
         }
 
         setMsgCierre(
@@ -324,7 +324,7 @@ Muchas felicidades y un sincero abrazo de parte de toda la familia Almi Pollo!`;
       setGanadorNumero('');
       setConfirmCierre(false);
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.DEV) console.error(err);
       setMsgCierre('⚠ Error al cerrar la rifa. Intenta de nuevo.');
     } finally {
       setLoadingCierre(false);
@@ -725,7 +725,7 @@ Muchas felicidades y un sincero abrazo de parte de toda la familia Almi Pollo!`;
                 </label>
                 <div className="flex gap-2 items-center">
                   <input
-                    type="number"
+                    type="text"
                     className="input-base text-center text-xl font-black font-display w-20 py-1.5"
                     placeholder="42"
                     value={ganadorNumero}
@@ -734,17 +734,16 @@ Muchas felicidades y un sincero abrazo de parte de toda la familia Almi Pollo!`;
                       setGanadorNumero(v);
                       setMsgCierre('');
                     }}
-                    min={0}
-                    max={99}
+                    maxLength={2}
                     inputMode="numeric"
                   />
-                  {ganadorNumero !== '' && boletas[formatearNumero(parseInt(ganadorNumero))]?.cliente_nombre && (
+                  {ganadorNumero !== '' && boletas[formatearNumero(parseInt(ganadorNumero, 10))]?.cliente_nombre && (
                     <div className="flex-1 bg-yellow-50 border border-yellow-200 rounded-xl p-2 text-xs">
                       <p className="font-bold text-yellow-700 truncate">
-                        🏆 {boletas[formatearNumero(parseInt(ganadorNumero))]?.cliente_nombre}
+                        🏆 {boletas[formatearNumero(parseInt(ganadorNumero, 10))]?.cliente_nombre}
                       </p>
                       <p className="text-yellow-600 text-[11px]">
-                        📱 {boletas[formatearNumero(parseInt(ganadorNumero))]?.cliente_whatsapp}
+                        📱 {boletas[formatearNumero(parseInt(ganadorNumero, 10))]?.cliente_whatsapp}
                       </p>
                     </div>
                   )}
@@ -848,18 +847,18 @@ Muchas felicidades y un sincero abrazo de parte de toda la familia Almi Pollo!`;
                 <div className="flex flex-col gap-2.5 bg-red-50/70 border border-red-200 p-3 rounded-xl">
                   <p className="text-center font-bold text-[#331c19] text-xs">
                     ¿Confirmas el cierre con el número <strong className="text-[#a3320e]">
-                      {ganadorNumero !== '' ? formatearNumero(parseInt(ganadorNumero)) : '??'}
+                      {ganadorNumero !== '' ? formatearNumero(parseInt(ganadorNumero, 10)) : '??'}
                     </strong> como ganador?
                   </p>
 
-                  {ganadorNumero !== '' && boletas[formatearNumero(parseInt(ganadorNumero))]?.cliente_nombre && (
+                  {ganadorNumero !== '' && boletas[formatearNumero(parseInt(ganadorNumero, 10))]?.cliente_nombre && (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-center text-xs text-emerald-800 flex flex-col gap-1">
                       <p className="font-bold flex items-center justify-center gap-1.5 text-xs text-emerald-900">
                         <MessageCircle size={14} className="text-[#25D366]" />
                         Se enviará WhatsApp desde la línea del negocio (313 831 2412):
                       </p>
                       <p className="text-xs font-semibold text-emerald-800">
-                        Destinatario: {boletas[formatearNumero(parseInt(ganadorNumero))]?.cliente_nombre} (📱 {boletas[formatearNumero(parseInt(ganadorNumero))]?.cliente_whatsapp})
+                        Destinatario: {boletas[formatearNumero(parseInt(ganadorNumero, 10))]?.cliente_nombre} (📱 {boletas[formatearNumero(parseInt(ganadorNumero, 10))]?.cliente_whatsapp})
                       </p>
                       <p className="text-[11px] text-emerald-700">
                         🍿 Premio: <strong>Pantalla de Netflix</strong> (se notifica entrega de credenciales en el día)

@@ -217,7 +217,7 @@ export default function Paso2ValidarCompra({ cliente, onCompraValidada, onVolver
       }, 1200);
 
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.DEV) console.error(err);
       setErrorGeneral('Error al procesar el código. Verifica tu conexión e intenta de nuevo.');
     } finally {
       setLoading(false);

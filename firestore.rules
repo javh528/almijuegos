@@ -2,52 +2,96 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions
+    // ── Helper functions ──────────────────────────────────────────────────────
+
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Reglas para el tablero de boletas
-    // Lectura pública para que cualquier cliente vea el tablero en tiempo real
-    match /boletas/{numero} {
-      allow read: if true;
-      // Escritura: solo por admin o por cliente al reservar mediante transacción
-      allow write: if isAuthenticated() || (
-        request.resource.data.estado == 'ocupado' &&
-        request.resource.data.cliente_whatsapp is string &&
-        request.resource.data.cliente_nombre is string
-      );
+    function isValidWhatsApp(wa) {
+      return wa is string && wa.matches('^3[0-9]{9}$');
     }
 
-    // Reglas para clientes
-    // Lectura y creación inicial por cliente, modificaciones controladas
+    function isValidNombre(n) {
+      return n is string && n.size() >= 2 && n.size() <= 50;
+    }
+
+    // ── Boletas ───────────────────────────────────────────────────────────────
+    // Lectura pública para que cualquier cliente vea el tablero en tiempo real.
+    // Escritura por admin (autenticado) o por cliente en operaciones de reserva
+    // con todos los campos requeridos y válidos.
+    match /boletas/{numero} {
+      allow read: if true;
+
+      // Admin puede hacer cualquier operación (incluido reset masivo)
+      allow write: if isAuthenticated();
+
+      // Cliente no autenticado: solo puede marcar como 'ocupado' con datos válidos
+      allow create, update: if
+        !isAuthenticated() &&
+        request.resource.data.estado == 'ocupado' &&
+        isValidWhatsApp(request.resource.data.cliente_whatsapp) &&
+        isValidNombre(request.resource.data.cliente_nombre) &&
+        request.resource.data.keys().hasAll(['numero', 'estado', 'cliente_whatsapp', 'cliente_nombre']);
+    }
+
+    // ── Clientes ──────────────────────────────────────────────────────────────
+    // Lectura pública (para que el tablero muestre el nombre de quien tiene cada número).
+    // Creación: el campo whatsapp debe coincidir con el ID del documento.
+    // Actualización: admin puede modificar todo; cliente solo puede actualizar su propio doc
+    //   y no puede escalar sus propios boletas_disponibles ni presas_saldo arbitrariamente.
     match /clientes/{whatsapp} {
       allow read: if true;
-      allow create: if request.resource.data.whatsapp == whatsapp;
-      allow update: if isAuthenticated() || (
-        request.resource.data.whatsapp == whatsapp
-      );
+
+      allow create: if
+        request.resource.data.whatsapp == whatsapp &&
+        isValidWhatsApp(whatsapp) &&
+        isValidNombre(request.resource.data.nombre) &&
+        request.resource.data.presas_saldo == 0 &&
+        request.resource.data.boletas_disponibles == 0;
+
+      // Solo admin puede actualizar saldos
+      allow update: if isAuthenticated();
+
       allow delete: if isAuthenticated();
     }
 
-    // Reglas para pines diarios
-    // Solo lectura de pines activos, escritura exclusiva de admin autenticado
+    // ── Pines diarios ─────────────────────────────────────────────────────────
+    // Solo admins pueden crear / modificar pines.
+    // La lectura es pública para que el cliente pueda validar el código.
     match /pines_diarios/{pinId} {
       allow read: if true;
       allow write: if isAuthenticated();
     }
 
-    // Reglas para transacciones
+    // ── Transacciones ─────────────────────────────────────────────────────────
+    // Lectura y escritura solo por admin (los datos de transacciones son sensibles).
+    // Excepción: la creación puede hacerla el backend implícito (cliente autenticado
+    // a nivel de app a través de la función cerrarRifa / agregarPresas).
+    // Para la operación de Paso2ValidarCompra (cliente no autenticado), el permiso
+    // de creación queda delegado a las Firestore Rules con validaciones mínimas.
     match /transacciones/{txId} {
       allow read: if isAuthenticated();
-      allow create: if true; // Creadas al validar compra
+
+      allow create: if
+        isAuthenticated() ||
+        (
+          request.resource.data.whatsapp is string &&
+          isValidWhatsApp(request.resource.data.whatsapp) &&
+          request.resource.data.presas_sumadas is int &&
+          request.resource.data.presas_sumadas >= 1 &&
+          request.resource.data.presas_sumadas <= 100 &&
+          request.resource.data.pin_usado is string &&
+          request.resource.data.pin_usado.size() == 4
+        );
+
       allow update, delete: if isAuthenticated();
     }
 
-    // Reglas para historial de rifas semanales
+    // ── Historial de rifas semanales ──────────────────────────────────────────
+    // Solo admin puede cerrar rifas y leer el historial.
     match /rifas_semanales/{rifaId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if isAuthenticated();
     }
   }
 }
