@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+@theme {
+  --color-almi-dark: #331c19;
+  --color-almi-primary: #a3320e;
+  --color-almi-secondary: #e06d2c;
+  --color-almi-accent: #c6501b;
+  --color-almi-cream: #e6d3d2;
+  --color-almi-beige: #fbf8f5;
+  --color-almi-brown: #c38f7c;
+
+  --font-sans: "Nunito Sans", sans-serif;
+  --font-display: "Nunito", sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+
+button, a, input, select {
+  touch-action: manipulation;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-almi-beige);
+  color: var(--color-almi-dark);
+  min-height: 100dvh;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Animaciones personalizadas */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(224, 109, 44, 0.4); }
+  50% { box-shadow: 0 0 16px 6px rgba(224, 109, 44, 0.7); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #e6d3d2 25%, #fbf8f5 50%, #e6d3d2 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Botones */
+.btn-primary {
+  @apply bg-[#a3320e] hover:bg-[#c6501b] active:bg-[#331c19] text-white font-bold py-4 px-6 rounded-2xl 
+         transition-all duration-200 shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+         disabled:active:scale-100 w-full text-lg tracking-wide font-display;
+}
+
+.btn-secondary {
+  @apply bg-[#e06d2c] hover:bg-[#c6501b] active:bg-[#a3320e] text-white font-bold py-3 px-5 rounded-xl 
+         transition-all duration-200 shadow-md active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+         font-display;
+}
+
+.btn-outline {
+  @apply border-2 border-[#a3320e] text-[#a3320e] hover:bg-[#a3320e] hover:text-white font-bold py-3 px-5 rounded-xl 
+         transition-all duration-200 active:scale-95 font-display;
+}
+
+/* Card base */
+.card {
+  @apply bg-white rounded-3xl shadow-md p-5 border border-[#e6d3d2]/60;
+}
+
+/* Input base */
+.input-base {
+  @apply w-full px-4 py-3.5 rounded-xl border-2 border-[#e6d3d2] focus:border-[#e06d2c] focus:outline-none 
+         focus:ring-2 focus:ring-[#e06d2c]/20 text-[#331c19] bg-white text-base transition-colors;
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold;
+}
+
+/* Número del tablero */
+.boleta-cell {
+  @apply aspect-square flex items-center justify-center rounded-md sm:rounded-xl text-[10px] sm:text-xs font-black 
+         transition-all duration-200 cursor-pointer select-none active:scale-90 touch-manipulation;
+}
+
+.boleta-disponible {
+  @apply bg-gradient-to-br from-[#e06d2c] to-[#a3320e] text-white shadow-sm 
+         hover:shadow-md hover:scale-105 active:scale-90;
+}
+
+.boleta-ocupado {
+  @apply bg-[#331c19] text-[#c38f7c] cursor-not-allowed opacity-80;
+}
+
+.boleta-propia {
+  @apply bg-gradient-to-br from-yellow-400 to-amber-500 text-[#331c19] shadow-lg ring-2 ring-yellow-300;
+  animation: pulseGlow 2s infinite;
+}
+
+/* Overlay modal */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-3 sm:p-4;
+}
+
+.modal-content {
+  @apply bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-sm shadow-2xl max-h-[90dvh] overflow-y-auto;
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #fbf8f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #c38f7c;
+  border-radius: 2px;
+}

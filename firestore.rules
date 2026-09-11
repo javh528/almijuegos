@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Reglas para el tablero de boletas
+    // Lectura pública para que cualquier cliente vea el tablero en tiempo real
+    match /boletas/{numero} {
+      allow read: if true;
+      // Escritura: solo por admin o por cliente al reservar mediante transacción
+      allow write: if isAuthenticated() || (
+        request.resource.data.estado == 'ocupado' &&
+        request.resource.data.cliente_whatsapp is string &&
+        request.resource.data.cliente_nombre is string
+      );
+    }
+
+    // Reglas para clientes
+    // Lectura y creación inicial por cliente, modificaciones controladas
+    match /clientes/{whatsapp} {
+      allow read: if true;
+      allow create: if request.resource.data.whatsapp == whatsapp;
+      allow update: if isAuthenticated() || (
+        request.resource.data.whatsapp == whatsapp
+      );
+      allow delete: if isAuthenticated();
+    }
+
+    // Reglas para pines diarios
+    // Solo lectura de pines activos, escritura exclusiva de admin autenticado
+    match /pines_diarios/{pinId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Reglas para transacciones
+    match /transacciones/{txId} {
+      allow read: if isAuthenticated();
+      allow create: if true; // Creadas al validar compra
+      allow update, delete: if isAuthenticated();
+    }
+
+    // Reglas para historial de rifas semanales
+    match /rifas_semanales/{rifaId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+  }
+}
