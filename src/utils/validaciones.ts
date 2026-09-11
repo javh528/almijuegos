@@ -209,12 +209,15 @@ export function obtenerFechaHoy(): string {
 }
 
 /**
- * Obtiene el ID de semana actual para la rifa
+ * Obtiene el ID del mes o periodo actual para la rifa
  */
-export function obtenerSemanaId(): string {
+export function obtenerMesId(): string {
   const now = new Date();
   const year = now.getFullYear();
-  const startOfYear = new Date(year, 0, 1);
-  const weekNum = Math.ceil(((now.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7);
-  return `${year}_w${weekNum.toString().padStart(2, '0')}`;
+  const month = (now.getMonth() + 1).toString().padStart(2, '0');
+  return `${year}_m${month}`;
+}
+
+export function obtenerSemanaId(): string {
+  return obtenerMesId();
 }

@@ -66,7 +66,7 @@ export default function Paso3Tablero({ cliente, onBoletaReservada, onSalir, onIr
     if (boleta?.cliente_whatsapp === clienteLocal.whatsapp) {
       setModal({
         tipo: 'error',
-        mensaje: `El número ${numero} ya está reservado por ti para el sorteo de esta semana.`,
+        mensaje: `El número ${numero} ya está reservado por ti para el sorteo de este mes.`,
       });
       return;
     }
@@ -238,7 +238,7 @@ export default function Paso3Tablero({ cliente, onBoletaReservada, onSalir, onIr
 
       {/* Info tablero */}
       <div className="flex items-center justify-between px-1">
-        <h2 className="font-display font-extrabold text-[#331c19] text-xs sm:text-sm">Tablero Semanal 00-99</h2>
+        <h2 className="font-display font-extrabold text-[#331c19] text-xs sm:text-sm">Tablero Mensual 00-99</h2>
         <div className="flex gap-1 sm:gap-1.5 text-xs">
           <span className="badge bg-[#e06d2c]/20 text-[#a3320e] py-0.5 text-[10px] sm:text-[11px] px-2 sm:px-3">🟢 {numerosDisponibles} libres</span>
           <span className="badge bg-[#331c19]/10 text-[#331c19] py-0.5 text-[10px] sm:text-[11px] px-2 sm:px-3">🔴 {numerosOcupados} ocupados</span>
@@ -348,7 +348,7 @@ export default function Paso3Tablero({ cliente, onBoletaReservada, onSalir, onIr
                 <div>
                   <h3 className="font-display font-extrabold text-[#331c19] text-xl">¿Confirmas este número?</h3>
                   <p className="text-[#c38f7c] text-sm mt-1">
-                    Al confirmar, reservarás el <strong>#{modal.numero}</strong> para la rifa de esta semana y se descontará 1 boleta.
+                    Al confirmar, reservarás el <strong>#{modal.numero}</strong> para la rifa de este mes y se descontará 1 boleta.
                   </p>
                 </div>
                 <div className="flex gap-3 w-full">
@@ -401,7 +401,7 @@ export default function Paso3Tablero({ cliente, onBoletaReservada, onSalir, onIr
                   <h3 className="font-display font-extrabold text-[#331c19] text-xl">¡Número Reservado!</h3>
                   <div className="mt-2 text-5xl font-black font-display text-[#a3320e]">#{modal.numero}</div>
                   <p className="text-[#c38f7c] text-sm mt-2">
-                    ¡Mucha suerte en el sorteo semanal de Almi Pollo!
+                    ¡Mucha suerte en el sorteo mensual de Almi Pollo!
                   </p>
                   <p className="text-sm font-semibold text-[#a3320e] mt-1">
                     Boletas restantes: {clienteLocal.boletas_disponibles}

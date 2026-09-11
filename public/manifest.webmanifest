@@ -1,7 +1,7 @@
 {
-  "name": "Almi Pollo — Rifa Semanal",
+  "name": "Almi Pollo — Rifa Mensual",
   "short_name": "AlmiPollo",
-  "description": "Acumula presas de pollo y participa en la rifa semanal 00-99 del Asadero Almi Pollo.",
+  "description": "Acumula presas de pollo y participa en la rifa mensual 00-99 del Asadero Almi Pollo.",
   "start_url": "/rifa",
   "display": "standalone",
   "background_color": "#fbf8f5",
