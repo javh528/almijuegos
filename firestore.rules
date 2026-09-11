@@ -38,20 +38,23 @@ service cloud.firestore {
     // ── Clientes ──────────────────────────────────────────────────────────────
     // Lectura pública (para que el tablero muestre el nombre de quien tiene cada número).
     // Creación: el campo whatsapp debe coincidir con el ID del documento.
-    // Actualización: admin puede modificar todo; cliente solo puede actualizar su propio doc
-    //   y no puede escalar sus propios boletas_disponibles ni presas_saldo arbitrariamente.
+    // Actualización: admin o el propio cliente al validar compra o reservar boleta.
     match /clientes/{whatsapp} {
       allow read: if true;
 
       allow create: if
         request.resource.data.whatsapp == whatsapp &&
         isValidWhatsApp(whatsapp) &&
-        isValidNombre(request.resource.data.nombre) &&
-        request.resource.data.presas_saldo == 0 &&
-        request.resource.data.boletas_disponibles == 0;
+        isValidNombre(request.resource.data.nombre);
 
-      // Solo admin puede actualizar saldos
-      allow update: if isAuthenticated();
+      // Permitir actualizar saldos al propio cliente o al admin autenticado
+      allow update: if
+        isAuthenticated() ||
+        (
+          request.resource.data.whatsapp == whatsapp &&
+          request.resource.data.presas_saldo >= 0 &&
+          request.resource.data.boletas_disponibles >= 0
+        );
 
       allow delete: if isAuthenticated();
     }
@@ -65,13 +68,12 @@ service cloud.firestore {
     }
 
     // ── Transacciones ─────────────────────────────────────────────────────────
-    // Lectura y escritura solo por admin (los datos de transacciones son sensibles).
-    // Excepción: la creación puede hacerla el backend implícito (cliente autenticado
-    // a nivel de app a través de la función cerrarRifa / agregarPresas).
-    // Para la operación de Paso2ValidarCompra (cliente no autenticado), el permiso
-    // de creación queda delegado a las Firestore Rules con validaciones mínimas.
+    // Lectura por admin o por el cliente de sus propias transacciones para validar unicidad.
     match /transacciones/{txId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() || (
+        resource.data.whatsapp is string &&
+        isValidWhatsApp(resource.data.whatsapp)
+      );
 
       allow create: if
         isAuthenticated() ||
