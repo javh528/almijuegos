@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
   updateDoc,
   addDoc,
   serverTimestamp,
@@ -171,13 +172,18 @@ export default function Paso2ValidarCompra({ cliente, onCompraValidada, onVolver
       const { boletasGanadas, nuevoSaldo } = calcularBoletas(cliente.presas_saldo, presasAsignadas);
       const nuevasBoletas_disponibles = cliente.boletas_disponibles + boletasGanadas;
 
-      // 5. Actualizar saldo del cliente en Firestore
+      // 5. Actualizar saldo del cliente en Firestore (con merge para máxima tolerancia a fallos)
       const clienteRef = doc(db, 'clientes', cliente.whatsapp);
-      await updateDoc(clienteRef, {
-        presas_saldo: nuevoSaldo,
-        boletas_disponibles: nuevasBoletas_disponibles,
-        nombre: cliente.nombre,
-      });
+      await setDoc(
+        clienteRef,
+        {
+          whatsapp: cliente.whatsapp,
+          nombre: cliente.nombre,
+          presas_saldo: nuevoSaldo,
+          boletas_disponibles: nuevasBoletas_disponibles,
+        },
+        { merge: true }
+      );
 
       // 6. Registrar transacción inmutable con categoría asignada
       await addDoc(collection(db, 'transacciones'), {
@@ -216,9 +222,18 @@ export default function Paso2ValidarCompra({ cliente, onCompraValidada, onVolver
         onCompraValidada(clienteActualizado, boletasGanadas);
       }, 1200);
 
-    } catch (err) {
+    } catch (err: unknown) {
       if (import.meta.env.DEV) console.error(err);
-      setErrorGeneral('Error al procesar el código. Verifica tu conexión e intenta de nuevo.');
+      const errMsg = err instanceof Error ? err.message : '';
+      if (errMsg.includes('permission-denied')) {
+        setErrorGeneral('Permiso denegado por las reglas de seguridad de Firebase. Revisa las reglas en Firebase Console.');
+      } else {
+        setErrorGeneral(
+          errMsg
+            ? `Error al procesar: ${errMsg}. Verifica tu conexión e intenta de nuevo.`
+            : 'Error al procesar el código. Verifica tu conexión e intenta de nuevo.'
+        );
+      }
     } finally {
       setLoading(false);
     }
